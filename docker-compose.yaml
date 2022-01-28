@@ -1,0 +1,51 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql:5.7
+    restart: unless-stopped
+    #volumes:
+      #- ./db/data:/var/lib/mysql
+      #- ./db/logs:/opt/logs
+    ports:
+      - 3307:3306
+    command: --sql_mode=""
+    environment:
+      MYSQL_ROOT_PASSWORD: i5071072_ftc61
+      MYSQL_DATABASE: i5071072_ftc61
+      MYSQL_USER: i5071072_ftc61
+      MYSQL_PASSWORD: Z.PWoiHLBf9OkT5LllZ71
+
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: webapp/laravel:v1
+    restart: always
+    volumes:
+      - ./webapp:/var/www
+    #depends_on:
+    #  - db
+    environment:
+      ENVIRONMENT: "development"
+
+  # NGINX PARA INTERPRETAR O CÓDIGO PHP
+  server:
+    image: nginx:alpine
+    restart: always
+    tty: true
+    volumes:
+      - ./webapp:/var/www
+      - ./infra/server/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - web
+    ports:
+      - 8000:80
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+     - 8083:803
